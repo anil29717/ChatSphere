@@ -15,7 +15,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: 'https://chatsphereapp.vercel.app/',
+  origin: 'https://chatsphereapp.vercel.app',
   credentials: true,
 }));
 app.use(express.json());
