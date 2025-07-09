@@ -27,8 +27,13 @@ app.use('/api/chat', chatRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: 'https://chatsphereapp.vercel.app',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
 });
+
 import socketHandler from './socket.js';
 socketHandler(io);
 
