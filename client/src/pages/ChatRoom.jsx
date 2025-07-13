@@ -139,7 +139,7 @@ const ChatRoom = () => {
   };
 
   return (
-    <div className="flex flex-col  bg-black text-white">
+    <div className="flex flex-col h-[620px] bg-black text-white">
       <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Header */}
