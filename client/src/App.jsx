@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from "./context/AuthContext";
 
 // Public Pages
@@ -27,50 +29,53 @@ const App = () => {
   const { user } = useAuth();
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Home />} />
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/profile" replace /> : <LoginPage />}
-      />
-      <Route
-        path="/register"
-        element={user ? <Navigate to="/profile" replace /> : <RegisterPage />}
-      />
-      <Route path="/admin-login" element={<AdminLogin />} />
+    <>
+      {/* ✅ ToastContainer must be placed once in the root app */}
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
 
-      {/* Admin Protected Routes */}
-      <Route
-        path="/admin"
-        element={
-          <AdminProtected>
-            <AdminLayout />
-          </AdminProtected>
-        }
-      >
-        <Route path="dashboard" element={<AdminPanel />} />
-        <Route path="add-money" element={<AddMoney />} />
-        <Route path="users" element={<UserList />} />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/profile" replace /> : <LoginPage />}
+        />
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/profile" replace /> : <RegisterPage />}
+        />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
-        {/* Add more admin pages here */}
-      </Route>
+        {/* Admin Protected Routes */}
+        <Route
+          path="/admin"
+          element={
+            <AdminProtected>
+              <AdminLayout />
+            </AdminProtected>
+          }
+        >
+          <Route path="dashboard" element={<AdminPanel />} />
+          <Route path="add-money" element={<AddMoney />} />
+          <Route path="users" element={<UserList />} />
+        </Route>
 
-      {/* User Protected Routes */}
-      <Route
-        element={
-          <PrivateRoute>
-            <UserLayout />
-          </PrivateRoute>
-        }
-      >
-        <Route path="/home" element={<UserHome />} />
-        <Route path="/search" element={<SearchUser />} />
-        <Route path="/chats" element={<ChatList />} />
-        <Route path="/chats/:userId" element={<ChatRoom />} />
-        <Route path="/profile" element={<UserProfile />} />
-      </Route>
-    </Routes>
+        {/* User Protected Routes */}
+        <Route
+          element={
+            <PrivateRoute>
+              <UserLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route path="/home" element={<UserHome />} />
+          <Route path="/search" element={<SearchUser />} />
+          <Route path="/chats" element={<ChatList />} />
+          <Route path="/chats/:userId" element={<ChatRoom />} />
+          <Route path="/profile" element={<UserProfile />} />
+        </Route>
+      </Routes>
+    </>
   );
 };
 

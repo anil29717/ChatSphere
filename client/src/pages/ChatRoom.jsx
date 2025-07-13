@@ -24,6 +24,8 @@ const ChatRoom = () => {
         const res = await API.get(`/chat/messages/${userId}`);
         setMessages(res.data.messages);
         setReceiver(res.data.receiver);
+        console.log("📥 Messages loaded from API:", res.data.messages);
+
       } catch (err) {
         console.error("Failed to load messages:", err);
       }
@@ -36,20 +38,66 @@ const ChatRoom = () => {
 
     socket.emit("join", user.id);
 
+    // socket.on("receive_message", (newMessage) => {
+    //   const inChatWith = location.pathname.includes(`/chats/${newMessage.sender}`);
+    //   if (!inChatWith) {
+    //     toast.info(`📩 New message from ${newMessage.senderName || "someone"}`);
+    //   }
+
+    //   const isRelevant =
+    //     (newMessage.sender === userId && newMessage.receiver === user.id) ||
+    //     (newMessage.sender === user.id && newMessage.receiver === userId);
+
+    //   if (isRelevant) {
+    //     setMessages((prev) => {
+    //       const exists = prev.some((msg) => msg._id === newMessage._id);
+    //       if (exists) return prev;
+    //       return [...prev, newMessage];
+    //     });
+    //   }
+
     socket.on("receive_message", (newMessage) => {
+      const isNotSender = newMessage.sender !== user.id;
       const inChatWith = location.pathname.includes(`/chats/${newMessage.sender}`);
-      if (!inChatWith) {
+
+      // ✅ Show toast + browser notification only if user is the receiver
+      if (isNotSender && !inChatWith) {
         toast.info(`📩 New message from ${newMessage.senderName || "someone"}`);
+
+        // ✅ Play notification sound
+        const audio = new Audio("/notification.mp3");
+        audio.play().catch((err) => {
+          console.warn("🔇 Unable to play sound:", err);
+        });
+
+        // ✅ Show browser notification
+        if (Notification.permission === "granted") {
+          const notification = new Notification("New Message", {
+            body: `${newMessage.senderName || "Someone"}: ${newMessage.message}`,
+            icon: "/chat-icon.png",
+          });
+
+          notification.onclick = () => {
+            window.focus();
+            window.location.href = `/chats/${newMessage.sender}`;
+          };
+        }
       }
 
+      // ✅ Update chat if the message is for this conversation
       const isRelevant =
         (newMessage.sender === userId && newMessage.receiver === user.id) ||
         (newMessage.sender === user.id && newMessage.receiver === userId);
 
       if (isRelevant) {
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev) => {
+          const exists = prev.some((msg) => msg._id === newMessage._id);
+          if (exists) return prev;
+          return [...prev, newMessage];
+        });
       }
     });
+
 
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop_typing", () => setIsTyping(false));
@@ -68,22 +116,19 @@ const ChatRoom = () => {
   const handleSend = async () => {
     if (!text.trim()) return;
 
-    try {
-      const res = await API.post(`/chat/send/${userId}`, { message: text });
-      setMessages((prev) => [...prev, res.data]);
+    const messageData = {
+      senderId: user.id,
+      receiverId: userId,
+      message: text,
+    };
 
-      socket.emit("send_message", {
-        senderId: user.id,
-        receiverId: userId,
-        message: text,
-      });
+    socket.emit("send_message", messageData); // Backend will save and emit
 
-      socket.emit("stop_typing", userId);
-      setText("");
-    } catch (err) {
-      console.error("Send message error", err);
-    }
+    setText(""); // Clear input
+    socket.emit("stop_typing", userId);
   };
+
+
 
   const handleTyping = () => {
     socket.emit("typing", userId);
@@ -144,12 +189,12 @@ const ChatRoom = () => {
 
               <div
                 className={`max-w-[75%] p-3 rounded-xl shadow-md ${isOwn
-                    ? "bg-blue-600 text-white rounded-br-none ml-auto"
-                    : "bg-zinc-800 text-white rounded-bl-none"
+                  ? "bg-blue-600 text-white rounded-br-none ml-auto"
+                  : "bg-zinc-800 text-white rounded-bl-none"
                   }`}
               >
                 <div className="whitespace-pre-line">{msg.message}</div>
-                 <div className="text-[10px] text-zinc-400 mt-1 text-right">
+                <div className="text-[10px] text-zinc-400 mt-1 text-right">
                   {new Date(msg.createdAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -157,10 +202,10 @@ const ChatRoom = () => {
                   {isOwn && msg.isRead ? " • Read" : ""}
                 </div>
               </div>
-              
-              
+
+
             </div>
-            
+
           );
         })}
 

@@ -1,7 +1,22 @@
+import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const UserProfile = () => {
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const requestPermission = () => {
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission().then((permission) => {
+          if (permission !== "granted") {
+            setTimeout(requestPermission, 15000); // Ask again every 15 seconds
+          }
+        });
+      }
+    };
+
+    requestPermission();
+  }, []);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 font-barlow">

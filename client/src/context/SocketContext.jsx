@@ -10,7 +10,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io('https://chatsphere-backend-swnr.onrender.com');
+      const newSocket = io('http://localhost:5000');
       newSocket.emit('join', user.id);
       setSocket(newSocket);
 

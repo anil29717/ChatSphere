@@ -154,7 +154,7 @@ const Register = () => {
               type="email"
               name="email"
               onChange={handleChange}
-              placeholder="Email (optional)"
+              placeholder="Email"
               className="bg-black text-white border border-gray-600 rounded-lg pl-10 py-2 w-full"
             />
           </div>
@@ -166,7 +166,7 @@ const Register = () => {
               type="text"
               name="number"
               onChange={handleChange}
-              placeholder="Phone (optional)"
+              placeholder="Phone"
               className="bg-black text-white border border-gray-600 rounded-lg pl-10 py-2 w-full"
             />
           </div>

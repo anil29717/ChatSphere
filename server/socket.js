@@ -23,6 +23,9 @@ const socketHandler = (io) => {
     socket.on('send_message', async ({ senderId, receiverId, message }) => {
       if (!senderId || !receiverId || !message) return;
 
+
+      const unreadCount = await Message.countDocuments({ receiver: receiverId, isRead: false });
+
       const newMessage = await Message.create({
         sender: senderId,
         receiver: receiverId,
@@ -30,15 +33,15 @@ const socketHandler = (io) => {
         isRead: false,
       });
 
-      const unreadCount = await Message.countDocuments({ receiverId, isRead: false });
-      
-      // Notify receiver in real-time
+      /// Notify both sender and receiver in real-time
+      io.to(senderId).emit('receive_message', newMessage);
       io.to(receiverId).emit('receive_message', newMessage);
+
       io.to(receiverId).emit('new_notification', {
-    from: senderId,
-    count: unreadCount,
-    preview: message,
-  });
+        from: senderId,
+        count: unreadCount,
+        preview: message,
+      });
     });
 
     socket.on('disconnect', () => {

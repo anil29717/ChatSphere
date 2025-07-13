@@ -14,10 +14,16 @@ import chatRoutes from './routes/chat.routes.js';
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  'https://chatsphereapp.vercel.app',
+  'http://localhost:5173',
+];
+
 app.use(cors({
-  origin: 'https://chatsphereapp.vercel.app',
+  origin: allowedOrigins,
   credentials: true,
 }));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
