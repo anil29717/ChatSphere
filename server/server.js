@@ -5,7 +5,6 @@ import mongoose from 'mongoose';
 import http from 'http';
 import { Server } from 'socket.io';
 
-
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
@@ -14,13 +13,17 @@ import chatRoutes from './routes/chat.routes.js';
 dotenv.config();
 
 const app = express();
-const allowedOrigins = [
-  'https://chatsphereapp.vercel.app',
-  'http://localhost:5173',
-];
+
+const allowedOrigin = 'https://lovefinderguru.vercel.app';
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: allowedOrigin,
+  credentials: true,
+}));
+
+// ✅ Handle preflight requests
+app.options('*', cors({
+  origin: allowedOrigin,
   credentials: true,
 }));
 
@@ -32,10 +35,11 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 
 const server = http.createServer(app);
+
+// ✅ Update Socket.IO CORS settings
 const io = new Server(server, {
   cors: {
-    origin: 'https://chatsphereapp.vercel.app',
-    methods: ['GET', 'POST'],
+    origin: allowedOrigin,
     credentials: true,
   },
 });
